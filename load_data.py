@@ -39,7 +39,7 @@ def get_miniplaces_data():
     testloader = torch.utils.data.DataLoader(testset, batch_size=1, num_workers=2)
 
     classes = []
-    txt_root = '../miniplaces/development_kit/data'
+    txt_root = './miniplaces/development_kit/data'
     txt_dir = os.path.join(txt_root, "categories" + '.txt')
     with open(txt_dir, 'r') as f:
         for line in f:

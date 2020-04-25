@@ -27,12 +27,13 @@ class AdaHAN(nn.Module):
             nn.AvgPool2d(kernel_size=3, padding=1, stride=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(8, 8, kernel_size=5, padding=2, stride=1),
-            nn.AvgPool2d(kernel_size=3, padding=1, stride=2),
+            # nn.AvgPool2d(kernel_size=3, padding=1, stride=2),
             nn.ReLU(inplace=True),
         )
 
         self.conv1by1 = nn.Conv2d(hidden_size, 2, kernel_size=1, padding=0, stride=1)  
         self.fc1 = nn.Linear(12**2, n_classes)
+        # there is a way to get the size of the output instead of doing 12**2
 
         self.batched = False
 
@@ -47,7 +48,7 @@ class AdaHAN(nn.Module):
             self.batched = False
             p = torch.sum(m ** 2, dim=0).view(-1)
         
-        topk = torch.topk(presence_vector, k=self.k)[1]
+        topk = torch.topk(p, k=self.k)[1]
         
         if self.batched:
             m = torch.sum(m, dim=1).view(-1, 12 * 12)
