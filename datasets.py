@@ -11,8 +11,8 @@ class MiniplacesDataset(data.Dataset):
     mean = [0.45432566120701207, 0.4362440955619064, 0.40466656402468215]
     std = [0.2643629213905866, 0.2612573977850761, 0.2790479352583138]
 
-    def __init__(self, split, crop_size=96, txt_root='../miniplaces/development_kit/data',
-                 image_root='../miniplaces/images'):
+    def __init__(self, split, crop_size=96, txt_root='./miniplaces/development_kit/data',
+                 image_root='./miniplaces/images'):
         assert split in ('train', 'val', 'test'), "split must be one of: train, val, and test"
         self.image_root = image_root
         self.split = split

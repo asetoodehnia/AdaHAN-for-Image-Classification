@@ -31,12 +31,15 @@ def get_cifar10_data():
     
     return trainset, trainloader, testset, testloader, classes
 
-def get_miniplaces_data():
-    trainset = datasets.MiniplacesDataset('train')
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=4)
+def get_miniplaces_data(batch_size):
+    train_set = datasets.MiniplacesDataset('train')
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
 
-    testset = datasets.MiniplacesDataset('test')
-    testloader = torch.utils.data.DataLoader(testset, batch_size=1, num_workers=2)
+    val_set = datasets.MiniplacesDataset('val')
+    val_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=4)
+
+    test_set = datasets.MiniplacesDataset('test')
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=1, num_workers=2)
 
     classes = []
     txt_root = './miniplaces/development_kit/data'
@@ -46,4 +49,4 @@ def get_miniplaces_data():
             tokens = line.strip().split()
             classes.append(tokens[0])
                 
-    return trainset, trainloader, testset, testloader, classes
+    return train_set, train_loader, val_set, val_loader, test_set, test_loader, classes

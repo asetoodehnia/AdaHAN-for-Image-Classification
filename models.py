@@ -30,50 +30,31 @@ class AdaHAN(nn.Module):
             # nn.AvgPool2d(kernel_size=3, padding=1, stride=2),
             nn.ReLU(inplace=True),
         )
-
         self.conv1by1 = nn.Conv2d(hidden_size, 2, kernel_size=1, padding=0, stride=1)  
-        self.fc1 = nn.Linear(12**2, n_classes)
-        # there is a way to get the size of the output instead of doing 12**2
-
-        self.batched = False
+        self.fc1 = nn.Linear(24**2, n_classes)
+        # there is a way to get the size of the output instead of doing 24**2
 
     def forward(self, image_tensor):
         x = self.encoder_cnn(image_tensor)
         m = self.conv1by1(x).squeeze(dim=0)
-        
-        if len(m.shape) == 4:
-            self.batched = True
-            p = torch.sum(m ** 2, dim=1).view(-1, 12 * 12)
-        else:
-            self.batched = False
-            p = torch.sum(m ** 2, dim=0).view(-1)
-        
+        if len(m) < 4:
+            m = m.unsqueeze(0)
+        p = torch.sum(m ** 2, dim=1).view(-1, 24**2)
         topk = torch.topk(p, k=self.k)[1]
-        
-        if self.batched:
-            m = torch.sum(m, dim=1).view(-1, 12 * 12)
-        else:
-            m = torch.sum(m, dim=0).view(-1)
+        m = torch.sum(m, dim=1).view(-1, 24**2)
         
         if self.adaptive:
-            latent_mask = torch.where(F.softmax(p, dim=0) >= (1/len(m)), torch.ones_like(p), torch.zeros_like(p))  
+            latent_mask = torch.where(F.softmax(p, dim=0) >= (1/len(m)), 
+                                      torch.ones_like(p), torch.zeros_like(p))  
         else:
             latent_mask = torch.zeros_like(p)
-            
-            if self.batched:
-                for i in range(latent_mask.shape[0]):
-                    latent_mask[i][topk[i]] = 1
-            else:
-                latent_mask[topk] = 1
-
+            for i in range(latent_mask.shape[0]):
+                latent_mask[i][topk[i]] = 1
         
-        attended_vector = m * latent_mask  # zeros out the activations at masked spatial locations
+        # zeros out the activations at masked spatial locations
+        attended_vector = m * latent_mask  
+        pred = F.log_softmax(self.fc1(attended_vector), dim=1)
         
-        if self.batched:
-            pred = F.log_softmax(self.fc1(attended_vector), dim=1)
-        else:
-            pred = F.log_softmax(self.fc1(attended_vector).unsqueeze(dim=0), dim=1)
-
         return pred, latent_mask
 
 
