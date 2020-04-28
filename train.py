@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def train(model, criterion, optimizer, train_set, val_set, num_epochs, batch_size, device):
+def train(model, criterion, optimizer, train_set, val_set, num_epochs, batch_size, device, attn=True):
     model.to(device)
     train_loader = torch.utils.data.DataLoader(train_set, 
                                                batch_size=batch_size,
@@ -42,7 +42,10 @@ def train(model, criterion, optimizer, train_set, val_set, num_epochs, batch_siz
             optimizer.zero_grad()
 
             # forward + backward + optimize
-            class_pred, latent_mask = model(inputs)
+            if attn:
+                class_pred, latent_mask = model(inputs)
+            else:
+                class_pred = model(inputs)
             loss = criterion(class_pred, labels)
             loss.backward()
             optimizer.step()
@@ -62,7 +65,7 @@ def train(model, criterion, optimizer, train_set, val_set, num_epochs, batch_siz
                 running_acc = 0.0
 
         val_loss, val_acc = get_loss_and_acc(model, criterion, 
-                                             val_loader, device)
+                                             val_loader, device, attn)
         
         val_losses.append(val_loss)
         val_accs.append(val_acc)
@@ -71,7 +74,7 @@ def train(model, criterion, optimizer, train_set, val_set, num_epochs, batch_siz
     return train_losses, train_accs, val_losses, val_accs
 
 
-def get_loss_and_acc(model, criterion, data_loader, device):
+def get_loss_and_acc(model, criterion, data_loader, device, attn=True):
     correct = 0
     total = 0
     running_loss = 0
@@ -84,7 +87,10 @@ def get_loss_and_acc(model, criterion, data_loader, device):
             labels = labels.to(device)
             
             # forward
-            class_pred, latent_mask = model(inputs)
+            if attn:
+                class_pred, latent_mask = model(inputs)
+            else:
+                class_pred = model(inputs)
             
             # loss
             loss = criterion(class_pred, labels)
