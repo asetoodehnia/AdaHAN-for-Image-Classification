@@ -71,7 +71,7 @@ class AttentionVisualizer(nn.Module):
         self.pool = nn.AvgPool2d(kernel_size=3, padding=1, stride=2)
         self.conv1 = nn.Conv2d(3, 1, kernel_size=5, padding=2, stride=1)
         self.conv2 = nn.Conv2d(1, 1, kernel_size=5, padding=2, stride=1)
-        self.conv3 = nn.Conv2d(1, 1, kernel_size=5, padding=2, stride=1)
+        # self.conv3 = nn.Conv2d(1, 1, kernel_size=5, padding=2, stride=1)
         
         self.dummy_input = torch.ones(1, 3, 96, 96, requires_grad=True)
 
@@ -80,7 +80,7 @@ class AttentionVisualizer(nn.Module):
         self.zero_grad()  # reset the gradients
         x = self.pool(self.conv1(self.dummy_input))
         x = self.pool(self.conv2(x))
-        x = self.pool(self.conv3(x))
+        # x = self.pool(self.conv3(x))
         x = torch.sum(x.view(-1) * latent_mask)
         x.backward()
         
